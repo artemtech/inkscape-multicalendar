@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Calendar</name>
-    <id>org.inkscape.render.calendar</id>
+    <name>Calendar (Extended)</name>
+    <id>org.inkscape.render.calendar.extended</id>
     <param name="tab" type="notebook">
         <page name="config" gui-text="Configuration">
             <param name="year" type="int" min="0" max="3000" gui-text="Year (4 digits):">2020</param>
@@ -17,7 +17,6 @@
                 <option value="sat">Saturday</option>
                 <option value="sun">Sunday</option>
             </param>
-            <param name="enable-hijri" type="bool" gui-text="Include Hijri Calendar">false</param>
         </page>
         <page name="layout" gui-text="Layout">
             <param name="auto-organize" type="bool" gui-text="Automatically set size and position">true</param>
@@ -34,8 +33,6 @@
             <param name="color-weekend"  type="string" gui-text="Weekend day color:">#787878</param>
             <param name="color-nmd"      type="string" gui-text="Next month day color:">#B0B0B0</param>
             <param name="color-weeknr"   type="string" gui-text="Week number color:">#787878</param>
-            <param name="color-day-hijri" type="string" gui-text="Hijri day color:">#04dd04</param>
-            <param name="color-weekend-hijri" type="string" gui-text="Hijri Weekend color:">#04dd04</param>
         </page>
     <page name="fonts" gui-text="Fonts">
             <param name="font-year"     type="string" gui-text="Year font:">arial</param>
