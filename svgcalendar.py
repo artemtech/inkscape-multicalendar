@@ -2,7 +2,9 @@
 # coding=utf-8
 #
 # Copyright (C) 2008 Aurelio A. Heckert <aurium(a)gmail.com>
+#
 #    Week number option added by Olav Vitters and Nicolas Dufour (2012)
+#    Hijri Calendar option added by Sofyan Sugianto <sofyan@artemtech.id> (2020)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,6 +38,8 @@ import sys
 
 import inkex
 from inkex import TextElement
+
+from hijri_converter import convert
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
@@ -120,6 +124,15 @@ class Calendar(inkex.EffectExtension):
         pars.add_argument(
             "--encoding", type=str, dest="input_encode", default='utf-8',
             help='The input encoding of the names.')
+        pars.add_argument(
+            "--enable-hijri", type=inkex.Boolean, dest="enable_hijri", default=False,
+            help='Include Hijri Calendar')
+        pars.add_argument(
+            "--color-day-hijri", type=str, dest="color_day_hijri", default="#04dd04",
+            help='Color for the common day in Hijri.')
+        pars.add_argument(
+            "--color-weekend-hijri", type=str, dest="color_weekend_hijri", default="#04dd04",
+            help='Color for the weekend day in Hijri.')
 
     def validate_options(self):
         # inkex.errormsg( self.options.input_encode )
@@ -204,13 +217,26 @@ class Calendar(inkex.EffectExtension):
         }
         self.style_weekend = self.style_day.copy()
         self.style_weekend['fill'] = self.options.color_weekend
+        self.style_day_hijri = self.style_day.copy()
+        self.style_day_hijri["font-size"] = str(self.day_w / 4)
+        self.style_day_hijri["fill"] = self.options.color_day_hijri
+        self.style_day_hijri["text-anchor"] = 'middle'
+        self.style_day_hijri["text-align"] = 'center'
+        self.style_weekend_hijri = self.style_day_hijri.copy()
+        self.style_weekend_hijri['fill'] = self.options.color_weekend_hijri
         self.style_nmd = self.style_day.copy()
         self.style_nmd['fill'] = self.options.color_nmd
         self.style_month = self.style_day.copy()
         self.style_month['fill'] = self.options.color_month
+        self.style_month["text-anchor"] = None
+        self.style_month["text-align"] = None
         self.style_month['font-family'] = self.options.font_month
         self.style_month['font-size'] = str(self.day_w / 1.5)
         self.style_month['font-weight'] = 'bold'
+        self.style_month_secondary = self.style_day_hijri.copy()
+        self.style_month_secondary['fill'] = self.options.color_month
+        self.style_month_secondary["text-anchor"] = 'end'
+        self.style_month_secondary["text-align"] = 'end'
         self.style_day_name = self.style_day.copy()
         self.style_day_name['fill'] = self.options.color_day_name
         self.style_day_name['font-family'] = self.options.font_day_name
@@ -256,7 +282,7 @@ class Calendar(inkex.EffectExtension):
 
     def write_month_header(self, g, m):
         txt_atts = {'style': str(inkex.Style(self.style_month)),
-                    'x': str((self.month_w - self.day_w) / 2),
+                    'x': str(-self.day_w / 3),
                     'y': str(self.day_h / 5)}
         try:
             g.add(TextElement(**txt_atts)).text = unicode(
@@ -288,6 +314,45 @@ class Calendar(inkex.EffectExtension):
 
             week_x += 1
 
+    def write_month_header_secondary(self, g, cal):
+        months_info = []
+        for week in cal:
+            for day in week:
+                if day != 0:
+                    try:
+                        months_info.index((day.month_name(), day.year))
+                    except ValueError:
+                        months_info.append((day.month_name(), day.year))
+        txt_atts = {'style': str(inkex.Style(self.style_month_secondary)),
+                    'x': str((self.month_w - (self.day_w / 1.5))),
+                    'y': "-1.5"}
+        try:
+            g.add(TextElement(**txt_atts)).text = unicode(
+                "{0} - {1}".format(
+                    months_info[0][0],
+                    months_info[0][1]),
+                self.options.input_encode)
+            txt_atts["y"] = "1.5"
+            g.add(TextElement(**txt_atts)).text = unicode(
+                "{0} - {1}".format(
+                    months_info[1][0],
+                    months_info[1][1]),
+                self.options.input_encode)
+        except:
+            raise ValueError('You must select a correct system encoding.')
+
+    def generate_hijri(self, cal, y, m):
+        cal2 = []
+        for week in cal:
+            weekcal = []
+            for day in week:
+                if day == 0:
+                    weekcal.append(day)
+                else:
+                    weekcal.append(convert.Gregorian(y, m, day).to_hijri())
+            cal2.append(weekcal)
+        return cal2
+
     def create_month(self, m):
         txt_atts = {
             'transform': 'translate(' +
@@ -306,32 +371,50 @@ class Calendar(inkex.EffectExtension):
         self.write_month_header(g, m)
         gdays = g.add(inkex.Group())
         cal = calendar.monthcalendar(self.options.year, m)
+        cal_hijri = self.generate_hijri(cal, self.options.year, m)
+        gmonths_sec = g.add(inkex.Group())
+        self.write_month_header_secondary(gmonths_sec, cal_hijri)
         if m == 1:
             if self.options.year > 1:
-                before_month = \
-                    self.in_line_month(calendar.monthcalendar(self.options.year - 1, 12))
+                tmp_cal = calendar.monthcalendar(self.options.year - 1, 12)
+                before_month = self.in_line_month(tmp_cal)
+                before_month_hijri = \
+                    self.in_line_month(self.generate_hijri(tmp_cal, self.options.year - 1, 12))
         else:
-            before_month = \
-                self.in_line_month(calendar.monthcalendar(self.options.year, m - 1))
+            tmp_cal = calendar.monthcalendar(self.options.year, m - 1)
+            before_month = self.in_line_month(tmp_cal)
+            before_month_hijri = \
+                self.in_line_month(self.generate_hijri(tmp_cal, self.options.year, m - 1))
         if m == 12:
-            next_month = \
-                self.in_line_month(calendar.monthcalendar(self.options.year + 1, 1))
+            tmp_cal = calendar.monthcalendar(self.options.year + 1, 1)
+            next_month = self.in_line_month(tmp_cal)
+            next_month_hijri = \
+                    self.in_line_month(self.generate_hijri(tmp_cal, self.options.year + 1, 1))
         else:
-            next_month = \
-                self.in_line_month(calendar.monthcalendar(self.options.year, m + 1))
+            tmp_cal = calendar.monthcalendar(self.options.year, m + 1)
+            next_month = self.in_line_month(tmp_cal)
+            next_month_hijri = \
+                   self.in_line_month(self.generate_hijri(tmp_cal, self.options.year, m + 1))
         if len(cal) < 6:
             # add a line after the last week
             cal.append([0, 0, 0, 0, 0, 0, 0])
+            cal_hijri.append([0, 0, 0, 0, 0, 0, 0])
         if len(cal) < 6:
             # add a line before the first week (Feb 2009)
             cal.reverse()
             cal.append([0, 0, 0, 0, 0, 0, 0])
             cal.reverse()
+            # add a line before the first week (Feb 2009)
+            cal_hijri.reverse()
+            cal_hijri.append([0, 0, 0, 0, 0, 0, 0])
+            cal_hijri.reverse()
         # How mutch before month days will be showed:
         bmd = cal[0].count(0) + cal[1].count(0)
+        bmd_hijri = cal_hijri[0].count(0) + cal_hijri[1].count(0)
         before = True
         week_y = 0
-        for week in cal:
+
+        for w_idx,week in enumerate(cal):
             if (self.weeknr != 0 and
                 ((self.options.start_day == 'mon' and week[0] != 0) or
                  (self.options.start_day == 'sun' and week[1] != 0))) or \
@@ -351,30 +434,43 @@ class Calendar(inkex.EffectExtension):
                     week_x += 1
                 else:
                     week_x += 1
-            for day in week:
+            for d_idx,day in enumerate(week):
                 style = self.style_day
+                style_hijri = self.style_day_hijri
                 if self.is_weekend(week_x - self.cols_before):
                     style = self.style_weekend
+                    style_hijri = self.style_weekend_hijri
                 if day == 0:
                     style = self.style_nmd
                 txt_atts = {'style': str(inkex.Style(style)),
-                            'x': str(self.day_w * week_x),
+                            'x': str(self.day_w * (week_x)),
                             'y': str(self.day_h * (week_y + 2))}
+                txt_atts_hijri = {'style': str(inkex.Style(style_hijri)),
+                            'x': str((self.day_w * week_x) + 2),
+                            'y': str((self.day_h * (week_y + 2)) + 2)}
                 text = None
+                text_hijri = None
                 if day == 0 and not self.options.fill_edb:
                     pass  # draw nothing
                 elif day == 0:
                     if before:
                         text = str(before_month[-bmd])
                         bmd -= 1
+                        text_hijri = str(before_month_hijri[-bmd_hijri].day)
+                        bmd_hijri -= 1
                     else:
                         text = str(next_month[bmd])
                         bmd += 1
+                        text_hijri = str(next_month_hijri[bmd_hijri].day)
+                        bmd_hijri += 1
                 else:
                     text = str(day)
+                    text_hijri = str(cal_hijri[w_idx][d_idx].day)
                     before = False
                 if text:
                     gdays.add(TextElement(**txt_atts)).text = text
+                if self.options.enable_hijri and text_hijri:
+                    gdays.add(TextElement(**txt_atts_hijri)).text = text_hijri
                 week_x += 1
             week_y += 1
         self.month_x_pos += 1
