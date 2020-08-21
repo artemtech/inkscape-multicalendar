@@ -29,7 +29,7 @@ http://en.wikipedia.org/wiki/ISO_week_date
 (The first week of a year is the week that contains the first Thursdayof the year.)
 """
 
-__version__ = "0.3"
+__version__ = "0.4"
 
 import datetime
 import calendar
