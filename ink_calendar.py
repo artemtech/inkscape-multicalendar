@@ -29,12 +29,14 @@ http://en.wikipedia.org/wiki/ISO_week_date
 (The first week of a year is the week that contains the first Thursdayof the year.)
 """
 
-__version__ = "0.4"
+__version__ = "0.3"
 
 import datetime
 import calendar
 import re
 import sys
+
+sys.path.append("/usr/share/inkscape/extensions")
 
 import inkex
 from inkex import TextElement
@@ -46,7 +48,13 @@ if sys.version_info[0] > 2:
         if isinstance(s, bytes):
             return s.decode(encoding)
         return s
+    def to_farsi(s):
+        new_s = ""
+        for char in s:
+            new_s += FARSI_NUMBER[int(char)]
+        return new_s
 
+FARSI_NUMBER = "٠١٢٣٤٥٦٧٨٩"
 
 class Calendar(inkex.EffectExtension):
     """Generate Calendar in SVG"""
@@ -97,16 +105,16 @@ class Calendar(inkex.EffectExtension):
             "--color-weeknr", type=str, dest="color_weeknr", default="#808080",
             help='Color for the week numbers.')
         pars.add_argument(
-            "--font-year", type=str, dest="font_year", default="arial",
+            "--font-year", type=str, dest="font_year", default="sans-serif",
             help='Font for the year string.')
         pars.add_argument(
-            "--font-month", type=str, dest="font_month", default="arial",
+            "--font-month", type=str, dest="font_month", default="sans-serif",
             help='Font for the month strings.')
         pars.add_argument(
-            "--font-day-name", type=str, dest="font_day_name", default="arial",
+            "--font-day-name", type=str, dest="font_day_name", default="sans-serif",
             help='Font for the days of the week strings.')
         pars.add_argument(
-            "--font-day", type=str, dest="font_day", default="arial",
+            "--font-day", type=str, dest="font_day", default="sans-serif",
             help='Font for the day strings.')
         pars.add_argument(
             "--month-names", type=str, dest="month_names",
@@ -127,6 +135,9 @@ class Calendar(inkex.EffectExtension):
         pars.add_argument(
             "--enable-hijri", type=inkex.Boolean, dest="enable_hijri", default=False,
             help='Include Hijri Calendar')
+        pars.add_argument(
+            "--use-farsi-day", type=inkex.Boolean, dest="use_farsi_day", default=False,
+            help='Use Farsi numbering symbol instead of arabic number')
         pars.add_argument(
             "--color-day-hijri", type=str, dest="color_day_hijri", default="#04dd04",
             help='Color for the common day in Hijri.')
@@ -370,6 +381,7 @@ class Calendar(inkex.EffectExtension):
         g = self.year_g.add(inkex.Group(**txt_atts))
         self.write_month_header(g, m)
         gdays = g.add(inkex.Group())
+        gdays_hijri = g.add(inkex.Group())
         cal = calendar.monthcalendar(self.options.year, m)
         cal_hijri = self.generate_hijri(cal, self.options.year, m)
         gmonths_sec = g.add(inkex.Group())
@@ -456,21 +468,21 @@ class Calendar(inkex.EffectExtension):
                     if before:
                         text = str(before_month[-bmd])
                         bmd -= 1
-                        text_hijri = str(before_month_hijri[-bmd_hijri].day)
+                        text_hijri = to_farsi(str(before_month_hijri[-bmd_hijri].day)) if self.options.use_farsi_day else str(before_month_hijri[-bmd_hijri].day)
                         bmd_hijri -= 1
                     else:
                         text = str(next_month[bmd])
                         bmd += 1
-                        text_hijri = str(next_month_hijri[bmd_hijri].day)
+                        text_hijri = to_farsi(str(next_month_hijri[bmd_hijri].day)) if self.options.use_farsi_day else str(next_month_hijri[bmd_hijri].day)
                         bmd_hijri += 1
                 else:
                     text = str(day)
-                    text_hijri = str(cal_hijri[w_idx][d_idx].day)
+                    text_hijri = to_farsi(str(cal_hijri[w_idx][d_idx].day)) if self.options.use_farsi_day else str(cal_hijri[w_idx][d_idx].day)
                     before = False
                 if text:
                     gdays.add(TextElement(**txt_atts)).text = text
                 if self.options.enable_hijri and text_hijri:
-                    gdays.add(TextElement(**txt_atts_hijri)).text = text_hijri
+                    gdays_hijri.add(TextElement(**txt_atts_hijri)).text = text_hijri
                 week_x += 1
             week_y += 1
         self.month_x_pos += 1

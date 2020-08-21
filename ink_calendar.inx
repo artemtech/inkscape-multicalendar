@@ -18,6 +18,7 @@
                 <option value="sun">Sunday</option>
             </param>
             <param name="enable-hijri" type="bool" gui-text="Include Hijri Calendar">false</param>
+            <param name="use-farsi-day" type="bool" gui-text="Use Farsi numbering symbol instead of Arabic number in Hijri days">false</param>
         </page>
         <page name="layout" gui-text="Layout">
             <param name="auto-organize" type="bool" gui-text="Automatically set size and position">true</param>
