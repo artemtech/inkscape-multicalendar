@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Calendar (Extended)</name>
-    <id>org.inkscape.render.calendar.extended</id>
+    <name>Multicalendar</name>
+    <id>org.inkscape.render.multicalendar</id>
     <param name="tab" type="notebook">
         <page name="config" gui-text="Configuration">
             <param name="year" type="int" min="0" max="3000" gui-text="Year (4 digits):">2020</param>
@@ -17,6 +17,7 @@
                 <option value="sat">Saturday</option>
                 <option value="sun">Sunday</option>
             </param>
+            <label appearance="header">Advanced Settings:</label>
             <param name="enable-hijri" type="bool" gui-text="Include Hijri Calendar">false</param>
             <param name="use-farsi-day" type="bool" gui-text="Use Farsi numbering symbol instead of Arabic number in Hijri days">false</param>
         </page>
@@ -143,6 +144,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command location="inx" interpreter="python">ink_calendar.py</command>
+        <command location="inx" interpreter="python">multicalendar.py</command>
     </script>
 </inkscape-extension>
