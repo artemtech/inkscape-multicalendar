@@ -1,7 +1,7 @@
-# SVG Calendar (Extended)
+# Inkscape Calendar Extension (Extended)
 
-This project is a fork from svgcalendar extension from Aurelio A. Heckert (2008). Upstream version
-already included in inkscape release as main extension.
+This project is extended version of svgcalendar from Aurelio A. Heckert (2008). Upstream version
+already included in inkscape release as main extension (see changelog).
 
 The aim of this fork is to add new features, such as Hijri addon, custom layout, and more.
 
