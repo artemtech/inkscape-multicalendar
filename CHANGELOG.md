@@ -3,4 +3,5 @@
 
 ## 2020-08-21
 ### Added
-- Add Hijri calendar next to Georgian Calendar
+- (ab93a2e) Add Hijri calendar next to Georgian Calendar
+- (db290d9) Add Farsi numbering in Hijri days 
