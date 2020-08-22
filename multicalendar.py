@@ -42,6 +42,7 @@ import inkex
 from inkex import TextElement
 
 from hijri_converter import convert
+from math import ceil
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
@@ -53,6 +54,26 @@ if sys.version_info[0] > 2:
         for char in s:
             new_s += FARSI_NUMBER[int(char)]
         return new_s
+    def hijri_monthcalendar(y, m):
+        date = convert.Hijri(y,m,1)
+        first_day = date.weekday()
+        n_days = date.month_length()
+        arrs = []
+        idx = 0
+        val = 0
+        for week in range( ceil( n_days / 7 ) ):
+            arr = []
+            for day in range(7):
+                if idx == first_day:
+                    val = 1
+                if val > n_days:
+                    val = 0
+                arr.append(val)
+                if val > 0:
+                    val += 1
+                idx += 1
+            c.append(arr)
+        return arrs
 
 FARSI_NUMBER = "٠١٢٣٤٥٦٧٨٩"
 
@@ -84,25 +105,25 @@ class Calendar(inkex.EffectExtension):
             "--month-margin", type=str, dest="month_margin", default="1cm",
             help='The space between the month boxes.')
         pars.add_argument(
-            "--color-year", type=str, dest="color_year", default="#888",
+            "--color-year", type=inkex.Color, dest="color_year", default="#888",
             help='Color for the year header.')
         pars.add_argument(
-            "--color-month", type=str, dest="color_month", default="#666",
+            "--color-month", type=inkex.Color, dest="color_month", default="#666",
             help='Color for the month name header.')
         pars.add_argument(
-            "--color-day-name", type=str, dest="color_day_name", default="#999",
+            "--color-day-name", type=inkex.Color, dest="color_day_name", default="#999",
             help='Color for the week day names header.')
         pars.add_argument(
-            "--color-day", type=str, dest="color_day", default="#000",
+            "--color-day", type=inkex.Color, dest="color_day", default="#000",
             help='Color for the common day box.')
         pars.add_argument(
-            "--color-weekend", type=str, dest="color_weekend", default="#777",
+            "--color-weekend", type=inkex.Color, dest="color_weekend", default="#777",
             help='Color for the weekend days.')
         pars.add_argument(
-            "--color-nmd", type=str, dest="color_nmd", default="#BBB",
+            "--color-nmd", type=inkex.Color, dest="color_nmd", default="#BBB",
             help='Color for the next month day, in empty day boxes.')
         pars.add_argument(
-            "--color-weeknr", type=str, dest="color_weeknr", default="#808080",
+            "--color-weeknr", type=inkex.Color, dest="color_weeknr", default="#808080",
             help='Color for the week numbers.')
         pars.add_argument(
             "--font-year", type=str, dest="font_year", default="sans-serif",
@@ -139,11 +160,18 @@ class Calendar(inkex.EffectExtension):
             "--use-farsi-day", type=inkex.Boolean, dest="use_farsi_day", default=False,
             help='Use Farsi numbering symbol instead of arabic number')
         pars.add_argument(
-            "--color-day-hijri", type=str, dest="color_day_hijri", default="#04dd04",
+            "--color-day-hijri", type=inkex.Color, dest="color_day_hijri", default="#04dd04",
             help='Color for the common day in Hijri.')
         pars.add_argument(
-            "--color-weekend-hijri", type=str, dest="color_weekend_hijri", default="#04dd04",
+            "--color-weekend-hijri", type=inkex.Color, dest="color_weekend_hijri", default="#04dd04",
             help='Color for the weekend day in Hijri.')
+        pars.add_argument(
+            "--hijri-month-names", type=str, dest="hijri_month_names",
+            default="Muharram Shafar Rabi'ul-Awal "
+                    "Rabi'ul-Akhir Jumadil-Awal Jumadil-Akhir "
+                    "Rajab Sya'ban Ramadan "
+                    "Syawal Dzulqaidah Dzulhijah",
+            help='The Hijri month names for localization.')
 
     def validate_options(self):
         # inkex.errormsg( self.options.input_encode )
@@ -161,6 +189,11 @@ class Calendar(inkex.EffectExtension):
                                         'April', 'May', 'June',
                                         'July', 'August', 'September',
                                         'October', 'November', 'December']
+            self.options.hijri_month_names = ["Muharram", "Shafar", "Rabi'ul-Awal",
+                                        "Rabi'ul-Akhir", "Jumadil-Awal", "Jumadil-Akhir",
+                                        "Rajab", "Sya'ban", "Ramadan",
+                                        "Syawal", "Dzulqaidah", "Dzulhijah"]
+
         if len(self.options.day_names) != 7:
             inkex.errormsg('The day name list "' +
                            str(self.options.day_names) +
