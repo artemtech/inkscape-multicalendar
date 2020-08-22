@@ -48,7 +48,7 @@
         <page name="localization" gui-text="Localization">
             <label>You may change the names for other languages:</label>
             <param name="month-names" type="string" translatable="yes" gui-text="Month names:">January February March April May June July August September October November December</param>
-            <param name="hijri-month-names" type="string" translatable="yes" gui-text="Hijri month names:">Muharram Shafar Rabi'ul-Awal Rabi'ul-Akhir Jumadil-Awal Jumadil-Akhir Rajab Sya'ban Ramadan Syawal Dzulqaidah Dzulhijah</param>
+            <param name="hijri-month-names" type="string" translatable="yes" gui-text="Hijri month names:">Muharram, Shafar, Rabi'ul-Awal, Rabi'ul-Akhir, Jumadil-Awal, Jumadil-Akhir, Rajab, Sya'ban, Ramadan, Syawal, Dzulqaidah, Dzulhijah</param>
             <param name="day-names"   type="string" translatable="yes" gui-text="Day names:">Sun Mon Tue Wed Thu Fri Sat</param>
             <label>The day names list must start with Sunday.</label>
             <param name="weeknr-name" type="string" translatable="yes" gui-text="Week number column name:">Wk</param>

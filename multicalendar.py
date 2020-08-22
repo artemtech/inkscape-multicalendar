@@ -167,10 +167,10 @@ class Calendar(inkex.EffectExtension):
             help='Color for the weekend day in Hijri.')
         pars.add_argument(
             "--hijri-month-names", type=str, dest="hijri_month_names",
-            default="Muharram Shafar Rabi'ul-Awal "
-                    "Rabi'ul-Akhir Jumadil-Awal Jumadil-Akhir "
-                    "Rajab Sya'ban Ramadan "
-                    "Syawal Dzulqaidah Dzulhijah",
+            default="Muharram, Shafar, Rabi'ul Awal, "
+                    "Rabi'ul-Akhir, Jumadil Awal, Jumadil Akhir, "
+                    "Rajab, Sya'ban, Ramadan, "
+                    "Syawal, Dzulqaidah, Dzulhijah",
             help='The Hijri month names for localization.')
         pars.add_argument("--primary-calendar", default="gregorian",\
             help='Define primary calendar to show. ("gregorian" or "hijri")')
