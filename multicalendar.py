@@ -183,8 +183,8 @@ class Calendar(inkex.EffectExtension):
         m = re.match(r'\s*(.*[^\s])\s*', self.options.day_names)
         self.options.day_names = re.split(r'\s+', m.group(1))
         # Convert Hijri string month names
-        mh = re.match(r'\s*(.*[^\s])\s*', self.options.hijri_month_names)
-        self.options.hijri_month_names = re.split(r'\s+', mh.group(1))
+        mh = re.match(r'\s*(.*[^,])\s*', self.options.hijri_month_names)
+        self.options.hijri_month_names = re.split(r',', mh.group(0))
         # Validate names lists
         if len(self.options.month_names) != 12:
             inkex.errormsg('The month name list "' +
