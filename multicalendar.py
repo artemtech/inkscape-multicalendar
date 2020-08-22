@@ -172,6 +172,8 @@ class Calendar(inkex.EffectExtension):
                     "Rajab Sya'ban Ramadan "
                     "Syawal Dzulqaidah Dzulhijah",
             help='The Hijri month names for localization.')
+        pars.add_argument("--primary-calendar", default="gregorian",\
+            help='Define primary calendar to show. ("gregorian" or "hijri")')
 
     def validate_options(self):
         # inkex.errormsg( self.options.input_encode )
@@ -180,6 +182,9 @@ class Calendar(inkex.EffectExtension):
         self.options.month_names = re.split(r'\s+', m.group(1))
         m = re.match(r'\s*(.*[^\s])\s*', self.options.day_names)
         self.options.day_names = re.split(r'\s+', m.group(1))
+        # Convert Hijri string month names
+        mh = re.match(r'\s*(.*[^\s])\s*', self.options.hijri_month_names)
+        self.options.hijri_month_names = re.split(r'\s+', mh.group(1))
         # Validate names lists
         if len(self.options.month_names) != 12:
             inkex.errormsg('The month name list "' +
@@ -364,9 +369,9 @@ class Calendar(inkex.EffectExtension):
             for day in week:
                 if day != 0:
                     try:
-                        months_info.index((day.month_name(), day.year))
+                        months_info.index((self.options.hijri_month_names[day.month - 1], day.year))
                     except ValueError:
-                        months_info.append((day.month_name(), day.year))
+                        months_info.append((self.options.hijri_month_names[day.month - 1], day.year))
         txt_atts = {'style': str(inkex.Style(self.style_month_secondary)),
                     'x': str((self.month_w - (self.day_w / 1.5))),
                     'y': "-1.5"}
