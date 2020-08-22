@@ -29,21 +29,21 @@
             <param name="month-margin" type="string" gui-text="Month Margin:">1cm</param>
         </page>
         <page name="colors" gui-text="Colors">
-            <param name="color-year"     type="string" gui-text="Year color:">#808080</param>
-            <param name="color-month"    type="string" gui-text="Month color:">#686868</param>
-            <param name="color-day-name" type="string" gui-text="Weekday name color:">#909090</param>
-            <param name="color-day"      type="string" gui-text="Day color:">#000000</param>
-            <param name="color-weekend"  type="string" gui-text="Weekend day color:">#787878</param>
-            <param name="color-nmd"      type="string" gui-text="Next month day color:">#B0B0B0</param>
-            <param name="color-weeknr"   type="string" gui-text="Week number color:">#787878</param>
-            <param name="color-day-hijri"   type="string" gui-text="Hijri day color:">#04dd04</param>
-            <param name="color-weekend-hijri"   type="string" gui-text="Hijri weekend color:">#04dd04</param>
+            <param name="color-year"     type="color" appearance="colorbutton" gui-text="Year color:"/>
+            <param name="color-month"    type="color" appearance="colorbutton" gui-text="Month color:"/>
+            <param name="color-day-name" type="color" appearance="colorbutton" gui-text="Weekday name color:"/>
+            <param name="color-day"      type="color" appearance="colorbutton" gui-text="Day color:"/>
+            <param name="color-weekend"  type="color" appearance="colorbutton" gui-text="Weekend day color:"/>
+            <param name="color-nmd"      type="color" appearance="colorbutton" gui-text="Next month day color:"/>
+            <param name="color-weeknr"   type="color" appearance="colorbutton" gui-text="Week number color:"/>
+            <param name="color-day-hijri"   type="color" appearance="colorbutton" gui-text="Hijri day color:"/>
+            <param name="color-weekend-hijri"   type="color" appearance="colorbutton" gui-text="Hijri weekend color:"/>
         </page>
     <page name="fonts" gui-text="Fonts">
-            <param name="font-year"     type="string" gui-text="Year font:">arial</param>
-            <param name="font-month"    type="string" gui-text="Month font:">arial</param>
-            <param name="font-day-name" type="string" gui-text="Weekday name font:">arial</param>
-            <param name="font-day"      type="string" gui-text="Day font:">arial</param>
+            <param name="font-year"     type="string" gui-text="Year font:">DejaVu Sans</param>
+            <param name="font-month"    type="string" gui-text="Month font:">DejaVu Sans</param>
+            <param name="font-day-name" type="string" gui-text="Weekday name font:">DejaVu Sans</param>
+            <param name="font-day"      type="string" gui-text="Day font:">DejaVu Sans</param>
     </page>
         <page name="localization" gui-text="Localization">
             <label>You may change the names for other languages:</label>
