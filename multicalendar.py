@@ -31,7 +31,7 @@ http://en.wikipedia.org/wiki/ISO_week_date
 
 __version__ = "0.3"
 
-import datetime
+# import datetime
 import calendar
 import re
 import sys
@@ -41,8 +41,8 @@ sys.path.append("/usr/share/inkscape/extensions")
 import inkex
 from inkex import TextElement
 
-from hijri_converter import convert
-from math import ceil
+# from hijri_converter import convert
+from math import ceil, floor
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
@@ -369,9 +369,9 @@ class Calendar(inkex.EffectExtension):
             for day in week:
                 if day != 0:
                     try:
-                        months_info.index((self.options.hijri_month_names[day.month - 1], day.year))
+                        months_info.index((self.options.hijri_month_names[day[1] - 1], day[0]))
                     except ValueError:
-                        months_info.append((self.options.hijri_month_names[day.month - 1], day.year))
+                        months_info.append((self.options.hijri_month_names[day[1] - 1], day[0]))
         txt_atts = {'style': str(inkex.Style(self.style_month_secondary)),
                     'x': str((self.month_w - (self.day_w / 1.5))),
                     'y': "-1.5"}
@@ -398,9 +398,46 @@ class Calendar(inkex.EffectExtension):
                 if day == 0:
                     weekcal.append(day)
                 else:
-                    weekcal.append(convert.Gregorian(y, m, day).to_hijri())
+                    weekcal.append(self.gregorian_to_hijri(y, m, day))
             cal2.append(weekcal)
         return cal2
+    
+    def gregorian_to_hijri(self, yg, mg, dg):
+        # return convert.Gregorian(yg, mg, dg).to_hijri()
+        dg -= 1
+        if(mg<3):
+            yg -= 1
+            mg += 12
+        a = floor(yg/100.0)
+        b = 2-a+floor(a/4.0)
+        if (yg<1583):
+            b = 0
+        if (yg==1582):
+            if (mg>10):
+                b = -10
+            if (mg==10):
+                b = 0
+                if (dg>4):
+                    b = -10
+                    
+        jd = floor(365.25*(yg+4716))+floor(30.6001*(mg+1))+dg+b-1524
+
+        iyear = 10631.0/30.0
+        epochastro = 1948084
+        shift1 = 8.01/60.0
+        
+        z = jd-epochastro
+        cyc = floor(z/10631.0)
+        z -= 10631*cyc
+        j = floor((z-shift1)/iyear)
+        iy = 30*cyc+j
+        z -= floor(j*iyear+shift1)
+        im = floor((z+28.5001)/29.5)
+        if(im==13):
+            im = 12
+        id = z-floor(29.5001*im-29)
+        date = [iy, im, id]
+        return date
 
     def create_month(self, m):
         txt_atts = {
@@ -506,16 +543,16 @@ class Calendar(inkex.EffectExtension):
                     if before:
                         text = str(before_month[-bmd])
                         bmd -= 1
-                        text_hijri = to_farsi(str(before_month_hijri[-bmd_hijri].day)) if self.options.use_farsi_day else str(before_month_hijri[-bmd_hijri].day)
+                        text_hijri = to_farsi(str(before_month_hijri[-bmd_hijri][2])) if self.options.use_farsi_day else str(before_month_hijri[-bmd_hijri][2])
                         bmd_hijri -= 1
                     else:
                         text = str(next_month[bmd])
                         bmd += 1
-                        text_hijri = to_farsi(str(next_month_hijri[bmd_hijri].day)) if self.options.use_farsi_day else str(next_month_hijri[bmd_hijri].day)
+                        text_hijri = to_farsi(str(next_month_hijri[bmd_hijri][2])) if self.options.use_farsi_day else str(next_month_hijri[bmd_hijri][2])
                         bmd_hijri += 1
                 else:
                     text = str(day)
-                    text_hijri = to_farsi(str(cal_hijri[w_idx][d_idx].day)) if self.options.use_farsi_day else str(cal_hijri[w_idx][d_idx].day)
+                    text_hijri = to_farsi(str(cal_hijri[w_idx][d_idx][2])) if self.options.use_farsi_day else str(cal_hijri[w_idx][d_idx][2])
                     before = False
                 if text:
                     gdays.add(TextElement(**txt_atts)).text = text
