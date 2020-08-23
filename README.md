@@ -38,3 +38,5 @@ Open this menu: `Extensions > Render > Multicalendar`
 ## Changelog
 See [Changelog](CHANGELOG.md)
 
+## Donation
+You can donate to support this project by visiting https://devlovers.netlify.app
