@@ -2,8 +2,12 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Multicalendar</name>
     <id>org.inkscape.render.multicalendar</id>
+    <label appearance="header">Welcome to Multicalendar</label>
+    <label>Multicalendar is the next calendar extension that will help you to generate multiple calendar system in one page at once. You can customize the base calendar in the tabs below.</label>
+    <spacer/>
     <param name="tab" type="notebook">
         <page name="config" gui-text="Configuration">
+            <label appearance="header">Basic Layout:</label>
             <param name="year" type="int" min="0" max="3000" gui-text="Year (4 digits):">2020</param>
             <param name="month" type="int" min="0" max="12" gui-text="Month (0 for all):">0</param>
             <param name="fill-empty-day-boxes" type="bool" gui-text="Fill empty day boxes with next month's days">true</param>
@@ -21,13 +25,6 @@
             <param name="enable-hijri" type="bool" gui-text="Include Hijri Calendar">false</param>
             <param name="use-farsi-day" type="bool" gui-text="Use Farsi numbering symbol instead of Arabic number in Hijri days">false</param>
         </page>
-        <page name="layout" gui-text="Layout">
-            <param name="auto-organize" type="bool" gui-text="Automatically set size and position">true</param>
-            <label>The options below have no influence when the above is checked.</label>
-            <param name="months-per-line" type="int" min="1" max="12" gui-text="Months per line:">3</param>
-            <param name="month-width" type="string" gui-text="Month Width:">6cm</param>
-            <param name="month-margin" type="string" gui-text="Month Margin:">1cm</param>
-        </page>
         <page name="colors" gui-text="Colors">
             <param name="color-year"     type="color" appearance="colorbutton" gui-text="Year color:"/>
             <param name="color-month"    type="color" appearance="colorbutton" gui-text="Month color:"/>
@@ -40,19 +37,28 @@
             <param name="color-weekend-hijri"   type="color" appearance="colorbutton" gui-text="Hijri weekend color:"/>
         </page>
     <page name="fonts" gui-text="Fonts">
+            <label>Make sure you type the font name correctly</label>
             <param name="font-year"     type="string" gui-text="Year font:">DejaVu Sans</param>
             <param name="font-month"    type="string" gui-text="Month font:">DejaVu Sans</param>
             <param name="font-day-name" type="string" gui-text="Weekday name font:">DejaVu Sans</param>
             <param name="font-day"      type="string" gui-text="Day font:">DejaVu Sans</param>
     </page>
         <page name="localization" gui-text="Localization">
-            <label>You may change the names for other languages:</label>
-            <param name="month-names" type="string" translatable="yes" gui-text="Month names:">January February March April May June July August September October November December</param>
-            <param name="hijri-month-names" type="string" translatable="yes" gui-text="Hijri month names:">Muharram, Shafar, Rabi'ul-Awal, Rabi'ul-Akhir, Jumadil-Awal, Jumadil-Akhir, Rajab, Sya'ban, Ramadan, Syawal, Dzulqaidah, Dzulhijah</param>
-            <param name="day-names"   type="string" translatable="yes" gui-text="Day names:">Sun Mon Tue Wed Thu Fri Sat</param>
-            <label>The day names list must start with Sunday.</label>
-            <param name="weeknr-name" type="string" translatable="yes" gui-text="Week number column name:">Wk</param>
-            <param name="encoding" gui-text="Char Encoding:" type="optiongroup" appearance="combo">
+            <label>You may change the names of days and months with your own languages:</label>
+            <spacer/>
+            <label>AD Month Names:</label>
+            <param name="month-names" type="string" translatable="no" gui-text="">January February March April May June July August September October November December</param>
+            <spacer/>
+            <label>Hijri Month Names (Please separate each names with comma):</label>
+            <param name="hijri-month-names" type="string" translatable="no" gui-text="">Muharram, Shafar, Rabi'ul-Awal, Rabi'ul-Akhir, Jumadil-Awal, Jumadil-Akhir, Rajab, Sya'ban, Ramadan, Syawal, Dzulqaidah, Dzulhijah</param>
+            <spacer/>
+            <label>Day names (The day names list have to start with Sunday.):</label>
+            <param name="day-names"   type="string" translatable="no" gui-text="">Sun Mon Tue Wed Thu Fri Sat</param>
+            <spacer/>
+            <label>Week number column name:</label>
+            <param name="weeknr-name" type="string" translatable="no" gui-text="">Wk</param>
+            <spacer/>
+            <param name="encoding" gui-text="Character Encoding:" type="optiongroup" appearance="combo">
                 <option translatable="no" value="arabic">arabic</option>
                 <option translatable="no" value="big5-tw">big5-tw</option>
                 <option translatable="no" value="big5-hkscs">big5-hkscs</option>
@@ -135,7 +141,24 @@
                 <option value="utf_16">UTF-16 - All languages</option>
                 <option value="utf_8">UTF-8 - All languages</option>
             </param>
-            <label>Select your system encoding. More information at http://docs.python.org/library/codecs.html#standard-encodings.</label>
+            <label>Select your system encoding. More information at:</label>
+            <label appearance="url">http://docs.python.org/library/codecs.html#standard-encodings.</label>
+            <spacer/>
+        </page>
+            <page name="extras" gui-text="Extras">
+            <label>You can add special mark in the specific date, please provide correct CSV file to use this extra feature</label>
+            <param type="path" name="csv-template" gui-text="Import CSV File:" mode="file" filetypes="csv"/>
+            <param name="color-extra-date"     type="color" appearance="colorbutton" gui-text="Extra dates color:"/>
+        </page>
+        <page name="credit" gui-text="Credit">
+            <label appearance="header">About Multicalendar</label>
+            <label>Multicalenddar is developed by Gimpscape ID Community, the original source is base on svgcalendar from Aurelio A. Heckert (2008). Upstream version already included in inkscape release as main extension.</label>
+            <spacer/>
+            <label appearance="header">Links:</label>
+            <label appearance="url">https://github.com/artemtech/inkscape-multicalendar</label>
+            <spacer/>
+            <label appearance="header">Support us:</label>
+            <label appearance="url">https://devlovers.netlify.app</label>
         </page>
     </param>
     <effect needs-live-preview="false">
