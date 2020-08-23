@@ -145,13 +145,12 @@
             <label appearance="url">http://docs.python.org/library/codecs.html#standard-encodings.</label>
             <spacer/>
         </page>
-            <page name="extras" gui-text="Extras">
+<!--        <page name="extras" gui-text="Extras">
             <label>You can add special mark in the specific date, please provide correct CSV file to use this extra feature</label>
             <param type="path" name="csv-template" gui-text="Import CSV File:" mode="file" filetypes="csv"/>
             <param name="color-extra-date"     type="color" appearance="colorbutton" gui-text="Extra dates color:"/>
-        </page>
+        </page>-->
         <page name="credit" gui-text="Credit">
-            <label appearance="header">About Multicalendar</label>
             <label>Multicalenddar is developed by Gimpscape ID Community, the original source is base on svgcalendar from Aurelio A. Heckert (2008). Upstream version already included in inkscape release as main extension.</label>
             <spacer/>
             <label appearance="header">Links:</label>
