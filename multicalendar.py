@@ -403,7 +403,6 @@ class Calendar(inkex.EffectExtension):
         return cal2
     
     def gregorian_to_hijri(self, yg, mg, dg):
-        # return convert.Gregorian(yg, mg, dg).to_hijri()
         dg -= 1
         if(mg<3):
             yg -= 1
@@ -436,6 +435,7 @@ class Calendar(inkex.EffectExtension):
         if(im==13):
             im = 12
         id = z-floor(29.5001*im-29)
+
         date = [iy, im, id]
         return date
 
