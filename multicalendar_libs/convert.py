@@ -1,5 +1,4 @@
 import datetime
-import inkex
 from math import floor
 
 class Gregorian:

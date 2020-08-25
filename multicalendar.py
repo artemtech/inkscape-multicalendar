@@ -43,7 +43,7 @@ from inkex import TextElement
 
 # from hijri_converter import convert
 from multicalendar_libs import convert
-from math import ceil, floor
+from math import ceil
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
