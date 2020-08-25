@@ -8,6 +8,10 @@
     <param name="tab" type="notebook">
         <page name="config" gui-text="Configuration">
             <label appearance="header">Basic Layout:</label>
+            <param name="primary-calendar" type="optiongroup" appearance="combo" gui-text="Primary calendar to show">
+                <option value="gregorian">Gregorian</option>
+                <option value="hijri">Hijri</option>
+            </param>
             <param name="year" type="int" min="0" max="3000" gui-text="Year (4 digits):">2020</param>
             <param name="month" type="int" min="0" max="12" gui-text="Month (0 for all):">0</param>
             <param name="fill-empty-day-boxes" type="bool" gui-text="Fill empty day boxes with next month's days">true</param>
@@ -22,7 +26,7 @@
                 <option value="sun">Sunday</option>
             </param>
             <label appearance="header">Advanced Settings:</label>
-            <param name="enable-hijri" type="bool" gui-text="Include Hijri Calendar">false</param>
+            <param name="enable-hijri" type="bool" gui-text="Include Secondary Calendar">false</param>
             <param name="use-farsi-day" type="bool" gui-text="Use Farsi numbering symbol instead of Arabic number in Hijri days">false</param>
         </page>
         <page name="colors" gui-text="Colors">
