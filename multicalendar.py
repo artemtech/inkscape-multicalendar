@@ -154,14 +154,14 @@ class Calendar(inkex.EffectExtension):
             "--encoding", type=str, dest="input_encode", default='utf-8',
             help='The input encoding of the names.')
         pars.add_argument(
-            "--enable-hijri", type=inkex.Boolean, dest="enable_hijri", default=False,
-            help='Include Hijri Calendar')
+            "--enable-secondary-date", type=inkex.Boolean, dest="enable_secondary_date", default=False,
+            help='Show Secondary Date')
         pars.add_argument(
             "--adjust-hijri-date", type=int, dest="adjust_hijri_date", default=0,
             help="Adjust the day if it is too fast or too late some days.")
         pars.add_argument(
-            "--use-farsi-day", type=inkex.Boolean, dest="use_farsi_day", default=False,
-            help='Use Farsi numbering symbol instead of arabic number')
+            "--use-farsi-day", type=str, dest="use_farsi_day", default='primer',
+            help='Use Farsi numbering symbol instead of arabic number (primer|second|both)')
         pars.add_argument(
             "--color-day-hijri", type=inkex.Color, dest="color_day_hijri", default="#04dd04",
             help='Color for the common day in Hijri.')
@@ -222,9 +222,6 @@ class Calendar(inkex.EffectExtension):
         # Convert string numbers with unit to user space float numbers
         self.options.month_width = self.svg.unittouu(self.options.month_width)
         self.options.month_margin = self.svg.unittouu(self.options.month_margin)
-        # Set enable hijri if primary calendar is hijri
-        if self.options.primary_calendar == "hijri":
-            self.options.enable_hijri = True
 
     # initial values
     month_x_pos = 0
@@ -452,9 +449,9 @@ class Calendar(inkex.EffectExtension):
             cal = calendar.monthcalendar(self.options.year, m)
             cal_secondary = self.generate_hijri(cal, self.options.year, m)
 
-        gmonths_secondary = g.add(inkex.Group())
-
-        self.write_month_header_secondary(gmonths_secondary, cal_secondary)
+        if self.options.enable_secondary_date:
+            gmonths_secondary = g.add(inkex.Group())
+            self.write_month_header_secondary(gmonths_secondary, cal_secondary)
 
         if m == 1:
             if self.options.year > 1:
@@ -575,11 +572,11 @@ class Calendar(inkex.EffectExtension):
                     text_secondary = str(cal_secondary[w_idx][d_idx][2])
                     before = False
                 if text:
-                    if self.options.primary_calendar == "hijri" and self.options.use_farsi_day:
+                    if self.options.use_farsi_day == "primer":
                         text = to_farsi(text)
                     gdays.add(TextElement(**txt_atts)).text = text
-                if self.options.enable_hijri and text_secondary:
-                    if self.options.primary_calendar == "gregorian" and self.options.use_farsi_day:
+                if self.options.enable_secondary_date and text_secondary:
+                    if self.options.use_farsi_day != "primer":
                         text_secondary = to_farsi(text_secondary)
                     gdays_secondary.add(TextElement(**txt_atts_hijri)).text = text_secondary
                 week_x += 1
