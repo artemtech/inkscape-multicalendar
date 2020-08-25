@@ -27,8 +27,8 @@
             </param>
             <label appearance="header">Advanced Settings:</label>
             <param name="enable-secondary-date" type="bool" gui-text="Include Secondary Calendar">false</param>
-            <param name="adjust-hijri-date" type="int" min="-5" max="5" gui-text="Adjust Hijri Day:">0</param>
-            <param name="use-farsi-day" type="optiongroup" appearance="combo" gui-text="Use Farsi number in Hijri days">
+            <param name="adjust-hijri-date" type="int" min="-5" max="5" gui-text="Add corrections for hijri date:">0</param>
+            <param name="use-farsi-day" type="optiongroup" appearance="combo" gui-text="Use farsi numbering instead of Arabic">
                 <option value="primer">Primary Only</option>
                 <option value="second">Secondary Only</option>
                 <option value="both">Primary + Secondary</option>
