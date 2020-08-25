@@ -389,14 +389,15 @@ class Calendar(inkex.EffectExtension):
                     months_info[0][0],
                     months_info[0][1]),
                 self.options.input_encode)
-            txt_atts["y"] = "1.5"
-            g.add(TextElement(**txt_atts)).text = unicode(
-                "{0} - {1}".format(
-                    months_info[1][0],
-                    months_info[1][1]),
-                self.options.input_encode)
+            if len(months_info) > 1:
+                txt_atts["y"] = "1.5"
+                g.add(TextElement(**txt_atts)).text = unicode(
+                    "{0} - {1}".format(
+                        months_info[1][0],
+                        months_info[1][1]),
+                    self.options.input_encode)
         except:
-            raise ValueError('You must select a correct system encoding.')
+            raise ValueError(months_info)
 
     def generate_gregorian(self, cal, y, m):
         cal2 = []
@@ -441,7 +442,6 @@ class Calendar(inkex.EffectExtension):
         self.write_month_header(g, m)
         gdays = g.add(inkex.Group())
         gdays_secondary = g.add(inkex.Group())
-
         if self.options.primary_calendar == "hijri":
             cal = hijri_monthcalendar(self.options.year, m)
             cal_secondary = self.generate_gregorian(cal, self.options.year, m)
@@ -478,24 +478,24 @@ class Calendar(inkex.EffectExtension):
                 before_month_secondary = \
                     self.in_line_month(self.generate_hijri(tmp_cal, self.options.year, m - 1))
         if m == 12:
+            tmp_cal = calendar.monthcalendar(self.options.year + 1, 1)
             if self.options.primary_calendar == "hijri":
-                tmp_cal = hijri_monthcalendar(self.options.year + 1, 12)
+                tmp_cal = hijri_monthcalendar(self.options.year + 1, 1)
                 next_month = self.in_line_month(tmp_cal)
                 next_month_secondary = \
                         self.in_line_month(self.generate_gregorian(tmp_cal, self.options.year + 1, 1))
             else:
-                tmp_cal = calendar.monthcalendar(self.options.year + 1, 1)
                 next_month = self.in_line_month(tmp_cal)
                 next_month_secondary = \
                         self.in_line_month(self.generate_hijri(tmp_cal, self.options.year + 1, 1))
         else:
+            tmp_cal = calendar.monthcalendar(self.options.year, m + 1)
             if self.options.primary_calendar == "hijri":
                 tmp_cal = hijri_monthcalendar(self.options.year, m + 1)
                 next_month = self.in_line_month(tmp_cal)
                 next_month_secondary = \
                     self.in_line_month(self.generate_gregorian(tmp_cal, self.options.year, m + 1))
             else:
-                tmp_cal = calendar.monthcalendar(self.options.year, m + 1)
                 next_month = self.in_line_month(tmp_cal)
                 next_month_secondary = \
                     self.in_line_month(self.generate_hijri(tmp_cal, self.options.year, m + 1))
