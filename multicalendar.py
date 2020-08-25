@@ -572,7 +572,7 @@ class Calendar(inkex.EffectExtension):
                     text_secondary = str(cal_secondary[w_idx][d_idx][2])
                     before = False
                 if text:
-                    if self.options.use_farsi_day == "primer":
+                    if self.options.use_farsi_day != "second":
                         text = to_farsi(text)
                     gdays.add(TextElement(**txt_atts)).text = text
                 if self.options.enable_secondary_date and text_secondary:
