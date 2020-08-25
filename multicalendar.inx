@@ -12,8 +12,8 @@
                 <option value="gregorian">Gregorian</option>
                 <option value="hijri">Hijri</option>
             </param>
-            <param name="year" type="int" min="0" max="3000" gui-text="Year (4 digits):">2020</param>
-            <param name="month" type="int" min="0" max="12" gui-text="Month (0 for all):">0</param>
+            <param name="year" type="int" min="0" max="3000" gui-text="Year (4 digits based on selected primary calendar):">2020</param>
+            <param name="month" type="int" min="0" max="12" gui-text="Month (0 to generate all):">0</param>
             <param name="fill-empty-day-boxes" type="bool" gui-text="Fill empty day boxes with next month's days">true</param>
             <param name="show-week-number" type="bool" gui-text="Show week number">false</param>
             <param name="start-day" type="optiongroup" appearance="combo" gui-text="Week start day:">
