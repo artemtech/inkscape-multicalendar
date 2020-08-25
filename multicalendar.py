@@ -41,7 +41,6 @@ sys.path.append("/usr/share/inkscape/extensions")
 import inkex
 from inkex import TextElement
 
-# from hijri_converter import convert
 from multicalendar_libs import convert
 from math import ceil
 
