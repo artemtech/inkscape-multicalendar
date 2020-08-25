@@ -23,6 +23,7 @@
             </param>
             <label appearance="header">Advanced Settings:</label>
             <param name="enable-hijri" type="bool" gui-text="Include Hijri Calendar">false</param>
+            <param name="adjust-hijri-date" type="int" min="-5" max="5" gui-text="Adjust Hijri Day:">0</param>
             <param name="use-farsi-day" type="bool" gui-text="Use Farsi numbering symbol instead of Arabic number in Hijri days">false</param>
         </page>
         <page name="colors" gui-text="Colors">

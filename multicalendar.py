@@ -31,7 +31,7 @@ http://en.wikipedia.org/wiki/ISO_week_date
 
 __version__ = "0.3"
 
-# import datetime
+import datetime
 import calendar
 import re
 import sys
@@ -42,6 +42,7 @@ import inkex
 from inkex import TextElement
 
 # from hijri_converter import convert
+from multicalendar_libs import convert
 from math import ceil, floor
 
 if sys.version_info[0] > 2:
@@ -156,6 +157,9 @@ class Calendar(inkex.EffectExtension):
         pars.add_argument(
             "--enable-hijri", type=inkex.Boolean, dest="enable_hijri", default=False,
             help='Include Hijri Calendar')
+        pars.add_argument(
+            "--adjust-hijri-date", type=int, dest="adjust_hijri_date", default=0,
+            help="Adjust the day if it is too fast or too late some days.")
         pars.add_argument(
             "--use-farsi-day", type=inkex.Boolean, dest="use_farsi_day", default=False,
             help='Use Farsi numbering symbol instead of arabic number')
@@ -398,46 +402,9 @@ class Calendar(inkex.EffectExtension):
                 if day == 0:
                     weekcal.append(day)
                 else:
-                    weekcal.append(self.gregorian_to_hijri(y, m, day))
+                    weekcal.append(convert.Gregorian(y, m, day, self.options.adjust_hijri_date).to_hijri())
             cal2.append(weekcal)
         return cal2
-    
-    def gregorian_to_hijri(self, yg, mg, dg):
-        dg -= 1
-        if(mg<3):
-            yg -= 1
-            mg += 12
-        a = floor(yg/100.0)
-        b = 2-a+floor(a/4.0)
-        if (yg<1583):
-            b = 0
-        if (yg==1582):
-            if (mg>10):
-                b = -10
-            if (mg==10):
-                b = 0
-                if (dg>4):
-                    b = -10
-                    
-        jd = floor(365.25*(yg+4716))+floor(30.6001*(mg+1))+dg+b-1524
-
-        iyear = 10631.0/30.0
-        epochastro = 1948084
-        shift1 = 8.01/60.0
-        
-        z = jd-epochastro
-        cyc = floor(z/10631.0)
-        z -= 10631*cyc
-        j = floor((z-shift1)/iyear)
-        iy = 30*cyc+j
-        z -= floor(j*iyear+shift1)
-        im = floor((z+28.5001)/29.5)
-        if(im==13):
-            im = 12
-        id = z-floor(29.5001*im-29)
-
-        date = [iy, im, id]
-        return date
 
     def create_month(self, m):
         txt_atts = {
