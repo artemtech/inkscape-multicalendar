@@ -1,5 +1,4 @@
 import datetime
-import inkex
 from math import floor
 
 class Gregorian:
@@ -57,6 +56,15 @@ class Hijri:
         self.month = month
         self.day = day
         self.adjust = adjust
+
+    def weekday(self):
+        jd = self.to_julian()
+        return int(jd % 7)
+    
+    def month_length(self):
+        c = Hijri(self.year, self.month + 1 , 1, self.adjust).to_julian()
+        b = Hijri(self.year, self.month , 1, self.adjust).to_julian()
+        return int(c - b)
 
     def to_julian(self):
         jd = floor((11 * self.year + 3) / 30) + floor(354 * self.year) + floor(30 * self.month) - floor((self.month - 1) / 2) + self.day + 1948440 - 386

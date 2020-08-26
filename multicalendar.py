@@ -41,9 +41,8 @@ sys.path.append("/usr/share/inkscape/extensions")
 import inkex
 from inkex import TextElement
 
-# from hijri_converter import convert
 from multicalendar_libs import convert
-from math import ceil, floor
+from math import ceil
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
@@ -55,8 +54,8 @@ if sys.version_info[0] > 2:
         for char in s:
             new_s += FARSI_NUMBER[int(char)]
         return new_s
-    def hijri_monthcalendar(y, m):
-        date = convert.Hijri(y,m,1)
+    def hijri_monthcalendar(y, m, adjust):
+        date = convert.Hijri(y,m,1, adjust)
         first_day = date.weekday()
         n_days = date.month_length()
         arrs = []
@@ -73,7 +72,7 @@ if sys.version_info[0] > 2:
                 if val > 0:
                     val += 1
                 idx += 1
-            c.append(arr)
+            arrs.append(arr)
         return arrs
 
 FARSI_NUMBER = "٠١٢٣٤٥٦٧٨٩"
@@ -155,14 +154,14 @@ class Calendar(inkex.EffectExtension):
             "--encoding", type=str, dest="input_encode", default='utf-8',
             help='The input encoding of the names.')
         pars.add_argument(
-            "--enable-hijri", type=inkex.Boolean, dest="enable_hijri", default=False,
-            help='Include Hijri Calendar')
+            "--enable-secondary-date", type=inkex.Boolean, dest="enable_secondary_date", default=False,
+            help='Show Secondary Date')
         pars.add_argument(
             "--adjust-hijri-date", type=int, dest="adjust_hijri_date", default=0,
             help="Adjust the day if it is too fast or too late some days.")
         pars.add_argument(
-            "--use-farsi-day", type=inkex.Boolean, dest="use_farsi_day", default=False,
-            help='Use Farsi numbering symbol instead of arabic number')
+            "--use-farsi-day", type=str, dest="use_farsi_day", default='primer',
+            help='Use Farsi numbering symbol instead of arabic number (primer|second|both)')
         pars.add_argument(
             "--color-day-hijri", type=inkex.Color, dest="color_day_hijri", default="#04dd04",
             help='Color for the common day in Hijri.')
@@ -176,7 +175,7 @@ class Calendar(inkex.EffectExtension):
                     "Rajab, Sya'ban, Ramadan, "
                     "Syawal, Dzulqaidah, Dzulhijah",
             help='The Hijri month names for localization.')
-        pars.add_argument("--primary-calendar", default="gregorian",\
+        pars.add_argument("--primary-calendar", dest="primary_calendar", default="gregorian",\
             help='Define primary calendar to show. ("gregorian" or "hijri")')
 
     def validate_options(self):
@@ -338,9 +337,10 @@ class Calendar(inkex.EffectExtension):
                     'x': str(-self.day_w / 3),
                     'y': str(self.day_h / 5)}
         try:
-            g.add(TextElement(**txt_atts)).text = unicode(
-                self.options.month_names[m - 1],
-                self.options.input_encode)
+            text = unicode(self.options.month_names[m - 1], self.options.input_encode)
+            if self.options.primary_calendar == "hijri":
+                text = unicode(self.options.hijri_month_names[m - 1], self.options.input_encode)
+            g.add(TextElement(**txt_atts)).text = text
         except:
             raise ValueError('You must select a correct system encoding.')
 
@@ -368,31 +368,49 @@ class Calendar(inkex.EffectExtension):
             week_x += 1
 
     def write_month_header_secondary(self, g, cal):
+        txt_atts = {'style': str(inkex.Style(self.style_month_secondary)),
+                    'x': str((self.month_w - (self.day_w / 1.5))),
+                    'y': "-1.5"}
         months_info = []
         for week in cal:
             for day in week:
                 if day != 0:
+                    tmp = self.options.hijri_month_names[day[1] - 1]
+                    if self.options.primary_calendar == "hijri":
+                        tmp = self.options.month_names[day[1] - 1]
                     try:
-                        months_info.index((self.options.hijri_month_names[day[1] - 1], day[0]))
+                        months_info.index((tmp, day[0]))
                     except ValueError:
-                        months_info.append((self.options.hijri_month_names[day[1] - 1], day[0]))
-        txt_atts = {'style': str(inkex.Style(self.style_month_secondary)),
-                    'x': str((self.month_w - (self.day_w / 1.5))),
-                    'y': "-1.5"}
+                        months_info.append((tmp, day[0]))
+
         try:
             g.add(TextElement(**txt_atts)).text = unicode(
                 "{0} - {1}".format(
                     months_info[0][0],
                     months_info[0][1]),
                 self.options.input_encode)
-            txt_atts["y"] = "1.5"
-            g.add(TextElement(**txt_atts)).text = unicode(
-                "{0} - {1}".format(
-                    months_info[1][0],
-                    months_info[1][1]),
-                self.options.input_encode)
+            if len(months_info) > 1:
+                txt_atts["y"] = "1.5"
+                g.add(TextElement(**txt_atts)).text = unicode(
+                    "{0} - {1}".format(
+                        months_info[1][0],
+                        months_info[1][1]),
+                    self.options.input_encode)
         except:
-            raise ValueError('You must select a correct system encoding.')
+            raise ValueError(months_info)
+
+    def generate_gregorian(self, cal, y, m, adjust):
+        cal2 = []
+        for week in cal:
+            weekcal = []
+            for day in week:
+                if day == 0:
+                    weekcal.append(day)
+                else:
+                    weekcal.append(convert.Hijri(y, m, day, adjust).to_gregorian())
+            cal2.append(weekcal)
+        return cal2
+
 
     def generate_hijri(self, cal, y, m):
         cal2 = []
@@ -423,48 +441,80 @@ class Calendar(inkex.EffectExtension):
         g = self.year_g.add(inkex.Group(**txt_atts))
         self.write_month_header(g, m)
         gdays = g.add(inkex.Group())
-        gdays_hijri = g.add(inkex.Group())
-        cal = calendar.monthcalendar(self.options.year, m)
-        cal_hijri = self.generate_hijri(cal, self.options.year, m)
-        gmonths_sec = g.add(inkex.Group())
-        self.write_month_header_secondary(gmonths_sec, cal_hijri)
+        gdays_secondary = g.add(inkex.Group())
+        if self.options.primary_calendar == "hijri":
+            cal = hijri_monthcalendar(self.options.year, m, self.options.adjust_hijri_date)
+            cal_secondary = self.generate_gregorian(cal, self.options.year, m, self.options.adjust_hijri_date)
+        else:
+            cal = calendar.monthcalendar(self.options.year, m)
+            cal_secondary = self.generate_hijri(cal, self.options.year, m)
+
+        if self.options.enable_secondary_date:
+            gmonths_secondary = g.add(inkex.Group())
+            self.write_month_header_secondary(gmonths_secondary, cal_secondary)
+
         if m == 1:
             if self.options.year > 1:
                 tmp_cal = calendar.monthcalendar(self.options.year - 1, 12)
-                before_month = self.in_line_month(tmp_cal)
-                before_month_hijri = \
-                    self.in_line_month(self.generate_hijri(tmp_cal, self.options.year - 1, 12))
+                if self.options.primary_calendar == "hijri":
+                    tmp_cal = hijri_monthcalendar(self.options.year - 1, 12, self.options.adjust_hijri_date)
+                    before_month = self.in_line_month(tmp_cal)
+                    before_month_secondary = \
+                    self.in_line_month(self.generate_gregorian(tmp_cal, self.options.year - 1, 12, self.options.adjust_hijri_date))
+                else:
+                    before_month = self.in_line_month(tmp_cal)
+                    before_month_secondary = \
+                        self.in_line_month(self.generate_hijri(tmp_cal, self.options.year - 1, 12))
+
         else:
-            tmp_cal = calendar.monthcalendar(self.options.year, m - 1)
-            before_month = self.in_line_month(tmp_cal)
-            before_month_hijri = \
-                self.in_line_month(self.generate_hijri(tmp_cal, self.options.year, m - 1))
+            if self.options.primary_calendar == "hijri":
+                tmp_cal = hijri_monthcalendar(self.options.year, m - 1, self.options.adjust_hijri_date)
+                before_month = self.in_line_month(tmp_cal)
+                before_month_secondary = \
+                    self.in_line_month(self.generate_gregorian(tmp_cal, self.options.year, m - 1, self.options.adjust_hijri_date))
+            else:
+                tmp_cal = calendar.monthcalendar(self.options.year, m - 1)
+                before_month = self.in_line_month(tmp_cal)
+                before_month_secondary = \
+                    self.in_line_month(self.generate_hijri(tmp_cal, self.options.year, m - 1))
         if m == 12:
             tmp_cal = calendar.monthcalendar(self.options.year + 1, 1)
-            next_month = self.in_line_month(tmp_cal)
-            next_month_hijri = \
-                    self.in_line_month(self.generate_hijri(tmp_cal, self.options.year + 1, 1))
+            if self.options.primary_calendar == "hijri":
+                tmp_cal = hijri_monthcalendar(self.options.year + 1, 1, self.options.adjust_hijri_date)
+                next_month = self.in_line_month(tmp_cal)
+                next_month_secondary = \
+                        self.in_line_month(self.generate_gregorian(tmp_cal, self.options.year + 1, 1, self.options.adjust_hijri_date))
+            else:
+                next_month = self.in_line_month(tmp_cal)
+                next_month_secondary = \
+                        self.in_line_month(self.generate_hijri(tmp_cal, self.options.year + 1, 1))
         else:
             tmp_cal = calendar.monthcalendar(self.options.year, m + 1)
-            next_month = self.in_line_month(tmp_cal)
-            next_month_hijri = \
-                   self.in_line_month(self.generate_hijri(tmp_cal, self.options.year, m + 1))
+            if self.options.primary_calendar == "hijri":
+                tmp_cal = hijri_monthcalendar(self.options.year, m + 1, self.options.adjust_hijri_date)
+                next_month = self.in_line_month(tmp_cal)
+                next_month_secondary = \
+                    self.in_line_month(self.generate_gregorian(tmp_cal, self.options.year, m + 1, self.options.adjust_hijri_date))
+            else:
+                next_month = self.in_line_month(tmp_cal)
+                next_month_secondary = \
+                    self.in_line_month(self.generate_hijri(tmp_cal, self.options.year, m + 1))
         if len(cal) < 6:
             # add a line after the last week
             cal.append([0, 0, 0, 0, 0, 0, 0])
-            cal_hijri.append([0, 0, 0, 0, 0, 0, 0])
+            cal_secondary.append([0, 0, 0, 0, 0, 0, 0])
         if len(cal) < 6:
             # add a line before the first week (Feb 2009)
             cal.reverse()
             cal.append([0, 0, 0, 0, 0, 0, 0])
             cal.reverse()
             # add a line before the first week (Feb 2009)
-            cal_hijri.reverse()
-            cal_hijri.append([0, 0, 0, 0, 0, 0, 0])
-            cal_hijri.reverse()
+            cal_secondary.reverse()
+            cal_secondary.append([0, 0, 0, 0, 0, 0, 0])
+            cal_secondary.reverse()
         # How mutch before month days will be showed:
         bmd = cal[0].count(0) + cal[1].count(0)
-        bmd_hijri = cal_hijri[0].count(0) + cal_hijri[1].count(0)
+        bmd_secondary = cal_secondary[0].count(0) + cal_secondary[1].count(0)
         before = True
         week_y = 0
 
@@ -503,28 +553,32 @@ class Calendar(inkex.EffectExtension):
                             'x': str((self.day_w * week_x) + 2),
                             'y': str((self.day_h * (week_y + 2)) + 2)}
                 text = None
-                text_hijri = None
+                text_secondary = None
                 if day == 0 and not self.options.fill_edb:
                     pass  # draw nothing
                 elif day == 0:
                     if before:
                         text = str(before_month[-bmd])
                         bmd -= 1
-                        text_hijri = to_farsi(str(before_month_hijri[-bmd_hijri][2])) if self.options.use_farsi_day else str(before_month_hijri[-bmd_hijri][2])
-                        bmd_hijri -= 1
+                        text_secondary = str(before_month_secondary[-bmd_secondary][2])
+                        bmd_secondary -= 1
                     else:
                         text = str(next_month[bmd])
                         bmd += 1
-                        text_hijri = to_farsi(str(next_month_hijri[bmd_hijri][2])) if self.options.use_farsi_day else str(next_month_hijri[bmd_hijri][2])
-                        bmd_hijri += 1
+                        text_secondary = str(next_month_secondary[bmd_secondary][2])
+                        bmd_secondary += 1
                 else:
                     text = str(day)
-                    text_hijri = to_farsi(str(cal_hijri[w_idx][d_idx][2])) if self.options.use_farsi_day else str(cal_hijri[w_idx][d_idx][2])
+                    text_secondary = str(cal_secondary[w_idx][d_idx][2])
                     before = False
                 if text:
+                    if self.options.use_farsi_day != "second":
+                        text = to_farsi(text)
                     gdays.add(TextElement(**txt_atts)).text = text
-                if self.options.enable_hijri and text_hijri:
-                    gdays_hijri.add(TextElement(**txt_atts_hijri)).text = text_hijri
+                if self.options.enable_secondary_date and text_secondary:
+                    if self.options.use_farsi_day != "primer":
+                        text_secondary = to_farsi(text_secondary)
+                    gdays_secondary.add(TextElement(**txt_atts_hijri)).text = text_secondary
                 week_x += 1
             week_y += 1
         self.month_x_pos += 1

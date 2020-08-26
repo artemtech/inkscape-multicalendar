@@ -4,15 +4,15 @@ This project is extended version of svgcalendar from Aurelio A. Heckert (2008). 
 already included in inkscape release as main extension (see changelog).
 
 The aim of this fork is to add new features, such as Hijri Calendar, Local Calendar (Javanese), update UI and more.
+Hijri calendar is based on Kuwaiti Algorithm.
 
 ## Requirements
 
 - inkscape 1.0
 - python >= 3.6
-- hijri-converter (you can install via pip: `pip3 install hijri-converter`)
 
 ## How to Install
-just copy the .ink an .py file into inkscape user extensions folder
+just copy the `multicalendar_libs, multicalendar.inx, and multicalendar.py` into inkscape user extensions folder
 (usually located in `$HOME/.config/inkscape/extensions`)
 
 Cannot find your inkscape user's extensions folder?, 
