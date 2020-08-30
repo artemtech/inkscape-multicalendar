@@ -9,7 +9,7 @@ class Gregorian:
         self.adjust = adjust
         
     def to_julian(self):
-        adjust = datetime.datetime(self.year, self.month, self.day) - datetime.timedelta(self.adjust)
+        adjust = datetime.datetime(self.year, self.month, self.day) - datetime.timedelta(self.adjust+1)
         jd = adjust.toordinal() + 1721425
         return jd
 
@@ -42,7 +42,7 @@ class Julian:
         return date
 
     def to_gregorian(self):
-        gdate = datetime.date.fromordinal(self.jd - 1721425) - datetime.timedelta(self.adjust)
+        gdate = datetime.date.fromordinal(self.jd - 1721425) - datetime.timedelta(1)
         yg = gdate.year
         mg = gdate.month
         dg = gdate.day
@@ -67,7 +67,7 @@ class Hijri:
         return int(c - b)
 
     def to_julian(self):
-        jd = floor((11 * self.year + 3) / 30) + floor(354 * self.year) + floor(30 * self.month) - floor((self.month - 1) / 2) + self.day + 1948440 - 386
+        jd = floor((11 * self.year + 3) / 30) + floor(354 * self.year) + floor(30 * self.month) - floor((self.month - 1) / 2) + (self.day+self.adjust+2) + 1948440 - 386
         return jd
 
     def to_gregorian(self):
