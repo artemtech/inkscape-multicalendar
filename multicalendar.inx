@@ -166,7 +166,7 @@
             <label appearance="url">https://github.com/artemtech/inkscape-multicalendar</label>
             <spacer/>
             <label appearance="header">Support us:</label>
-            <label appearance="url">https://devlovers.netlify.app</label>
+            <label appearance="url">https://support.dev-is.my.id/</label>
         </page>
     </param>
     <effect needs-live-preview="false">
