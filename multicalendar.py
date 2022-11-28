@@ -280,7 +280,7 @@ class Calendar(inkex.EffectExtension):
         self.style_nmd['fill'] = self.options.color_nmd
         self.style_month = self.style_day.copy()
         self.style_month['fill'] = self.options.color_month
-        self.style_month["text-anchor"] = None
+        self.style_month["text-anchor"] = 'inherit'
         self.style_month["text-align"] = None
         self.style_month['font-family'] = self.options.font_month
         self.style_month['font-size'] = str(self.day_w / 1.5)
