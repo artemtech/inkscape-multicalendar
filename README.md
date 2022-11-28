@@ -6,6 +6,9 @@ already included in inkscape release as main extension (see changelog).
 The aim of this fork is to add new features, such as Hijri Calendar, Local Calendar (Javanese), update UI and more.
 Hijri calendar is based on Kuwaiti Algorithm.
 
+![preview](https://user-images.githubusercontent.com/22854966/204311092-56fca04f-12e2-4822-b8ad-afde5130806d.png)
+
+
 ## Requirements
 
 - inkscape 1.0
