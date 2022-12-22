@@ -44,6 +44,14 @@ from inkex import TextElement
 from multicalendar_libs import convert
 from math import ceil
 
+import logging
+
+logging.basicConfig(filename="/home/altintop/a/inkscape.log",
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
         if isinstance(s, bytes):
@@ -177,6 +185,8 @@ class Calendar(inkex.EffectExtension):
             help='The Hijri month names for localization.')
         pars.add_argument("--primary-calendar", dest="primary_calendar", default="gregorian",\
             help='Define primary calendar to show. ("gregorian" or "hijri")')
+        pars.add_argument("--third-calendar", dest="third_calendar", default=None,\
+            help='Third calendar to show.')
 
     def validate_options(self):
         # inkex.errormsg( self.options.input_encode )
@@ -222,6 +232,9 @@ class Calendar(inkex.EffectExtension):
         # Convert string numbers with unit to user space float numbers
         self.options.month_width = self.svg.unittouu(self.options.month_width)
         self.options.month_margin = self.svg.unittouu(self.options.month_margin)
+
+        if self.options.third_calendar == "":
+            self.options.third_calendar = None
 
     # initial values
     month_x_pos = 0
@@ -301,6 +314,14 @@ class Calendar(inkex.EffectExtension):
         self.style_weeknr = self.style_day.copy()
         self.style_weeknr['fill'] = self.options.color_weeknr
         self.style_weeknr['font-size'] = str(self.day_w / 3)
+        logging.info(f"third calendar ==> {self.options.third_calendar}")
+        if self.options.third_calendar:
+            self.style_day_pasaran = self.style_day_hijri.copy()
+            self.style_day_pasaran["font-size"] = str(self.day_w / 8)
+            self.style_day_hijri["font-size"] = str(self.day_w / 7)
+            self.style_day_hijri["text-anchor"] = 'start'
+            self.style_weekend_hijri["text-anchor"] = 'start'
+            self.style_weekend_hijri["font-size"] = str(self.day_w / 7)
 
     def is_weekend(self, pos):
         # weekend values: "sat+sun" or "sat" or "sun"
@@ -432,7 +453,7 @@ class Calendar(inkex.EffectExtension):
                 if day == 0:
                     weekcal.append(day)
                 else:
-                    weekcal.append(convert.Jawa(y, m, day))
+                    weekcal.append(str(convert.Jawa(y, m, day)))
             cal2.append(weekcal)
         return cal2
 
@@ -454,15 +475,18 @@ class Calendar(inkex.EffectExtension):
         self.write_month_header(g, m)
         gdays = g.add(inkex.Group())
         gdays_secondary = g.add(inkex.Group())
-        gdays_pasaran = g.add(inkex.Group())
+        if self.options.third_calendar:
+            gdays_pasaran = g.add(inkex.Group())
         if self.options.primary_calendar == "hijri":
             cal = hijri_monthcalendar(self.options.year, m, self.options.adjust_hijri_date)
             cal_secondary = self.generate_gregorian(cal, self.options.year, m, self.options.adjust_hijri_date)
-            cal_pasaran = self.generate_pasaran(cal, self.options.year, m)
+            if self.options.third_calendar:
+                cal_pasaran = self.generate_pasaran(cal, self.options.year, m)
         else:
             cal = calendar.monthcalendar(self.options.year, m)
             cal_secondary = self.generate_hijri(cal, self.options.year, m)
-            cal_pasaran = self.generate_pasaran(cal, self.options.year, m)
+            if self.options.third_calendar:
+                cal_pasaran = self.generate_pasaran(cal, self.options.year, m)
 
         if self.options.enable_secondary_date:
             gmonths_secondary = g.add(inkex.Group())
@@ -518,7 +542,8 @@ class Calendar(inkex.EffectExtension):
             # add a line after the last week
             cal.append([0, 0, 0, 0, 0, 0, 0])
             cal_secondary.append([0, 0, 0, 0, 0, 0, 0])
-            cal_pasaran.append([0, 0, 0, 0, 0, 0, 0])
+            if self.options.third_calendar:
+                cal_pasaran.append([0, 0, 0, 0, 0, 0, 0])
         if len(cal) < 6:
             # add a line before the first week (Feb 2009)
             cal.reverse()
@@ -528,9 +553,10 @@ class Calendar(inkex.EffectExtension):
             cal_secondary.reverse()
             cal_secondary.append([0, 0, 0, 0, 0, 0, 0])
             cal_secondary.reverse()
-            cal_pasaran.reverse()
-            cal_pasaran.append([0, 0, 0, 0, 0, 0, 0])
-            cal_pasaran.reverse()
+            if self.options.third_calendar:
+                cal_pasaran.reverse()
+                cal_pasaran.append([0, 0, 0, 0, 0, 0, 0])
+                cal_pasaran.reverse()
         # How mutch before month days will be showed:
         bmd = cal[0].count(0) + cal[1].count(0)
         bmd_secondary = cal_secondary[0].count(0) + cal_secondary[1].count(0)
@@ -560,6 +586,8 @@ class Calendar(inkex.EffectExtension):
             for d_idx,day in enumerate(week):
                 style = self.style_day
                 style_hijri = self.style_day_hijri
+                if self.options.third_calendar:
+                    style_pasaran = self.style_day_pasaran
                 if self.is_weekend(week_x - self.cols_before):
                     style = self.style_weekend
                     style_hijri = self.style_weekend_hijri
@@ -571,29 +599,29 @@ class Calendar(inkex.EffectExtension):
                 txt_atts_hijri = {'style': str(inkex.Style(style_hijri)),
                             'x': str((self.day_w * week_x) + 2),
                             'y': str((self.day_h * (week_y + 2)) + 2)}
-                txt_atts_pasaran = {'style': str(inkex.Style(style_hijri)),
-                            'x': str((self.day_w * week_x) + 2),
+                if self.options.third_calendar:
+                    txt_atts_pasaran = {'style': str(inkex.Style(style_pasaran)),
+                            'x': str((self.day_w * week_x)),
                             'y': str((self.day_h * (week_y + 2)) + 2)}
+                    txt_atts_hijri['x']= str((self.day_w * week_x) + 2)
                 text = None
                 text_secondary = None
-                text_pasaran = None
+                if self.options.third_calendar:
+                    text_pasaran = None
                 if day == 0 and not self.options.fill_edb:
                     pass  # draw nothing
                 elif day == 0:
                     if before:
                         text = str(before_month[-bmd])
                         bmd -= 1
-                        text_secondary = str(before_month_secondary[-bmd_secondary][2])
-                        bmd_secondary -= 1
                     else:
                         text = str(next_month[bmd])
                         bmd += 1
-                        text_secondary = str(next_month_secondary[bmd_secondary][2])
-                        bmd_secondary += 1
                 else:
                     text = str(day)
                     text_secondary = str(cal_secondary[w_idx][d_idx][2])
-                    text_pasaran = str(cal_pasaran[w_idx][d_idx][2])
+                    if self.options.third_calendar:
+                        text_pasaran = str(cal_pasaran[w_idx][d_idx])
                     before = False
                 if text:
                     if self.options.use_farsi_day != "second":
@@ -602,8 +630,21 @@ class Calendar(inkex.EffectExtension):
                 if self.options.enable_secondary_date and text_secondary:
                     if self.options.use_farsi_day != "primer":
                         text_secondary = to_farsi(text_secondary)
-                    gdays_secondary.add(TextElement(**txt_atts_hijri)).text = text_secondary
-                    gdays_pasaran.add(TextElement()).text = text_pasaran
+                    if self.options.third_calendar:
+                        # txt_atts_pasaran['x'] = str(float(gdays[-1].shape_box().width))
+                        # logging.info(gdays[-1].shape_box().minimum)
+                        if len(text_pasaran) < 4 :
+                            txt_atts_hijri['x'] = str(float(txt_atts_hijri['x']) - 0.85)
+                        elif len(text_pasaran) < 5 :
+                            txt_atts_hijri['x'] = str(float(txt_atts_hijri['x']) - 0.65)
+                        else:
+                            txt_atts_hijri['x'] = str(float(txt_atts_hijri['x']) - 0.45)
+
+                        gdays_pasaran.add(TextElement(**txt_atts_pasaran)).text = text_pasaran
+                        # txt_atts_hijri['x'] = str(float(gdays_pasaran[-1].shape_box().maximum.x) + 1.25)
+                        gdays_secondary.add(TextElement(**txt_atts_hijri)).text = text_secondary
+                    else:
+                        gdays_secondary.add(TextElement(**txt_atts_hijri)).text = text_secondary
                 week_x += 1
             week_y += 1
         self.month_x_pos += 1

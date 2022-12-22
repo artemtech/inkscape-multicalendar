@@ -33,6 +33,10 @@
                 <option value="second">Secondary Only</option>
                 <option value="both">Primary + Secondary</option>
             </param>
+            <param name="third-calendar" type="optiongroup" appearance="combo" gui-text="Add Third Calendar">
+                <option value="">None</option>
+                <option value="jawa">Jawa</option>
+            </param>
         </page>
         <page name="colors" gui-text="Colors">
             <param name="color-year"     type="color" appearance="colorbutton" gui-text="Year color:"/>

@@ -7,7 +7,7 @@ class Gregorian:
         self.month = month
         self.day = day
         self.adjust = adjust
-        
+
     def to_julian(self):
         adjust = datetime.datetime(self.year, self.month, self.day) - datetime.timedelta(self.adjust+1)
         jd = adjust.toordinal() + 1721425
@@ -60,7 +60,7 @@ class Hijri:
     def weekday(self):
         jd = self.to_julian()
         return int(jd % 7)
-    
+
     def month_length(self):
         c = Hijri(self.year, self.month + 1 , 1, self.adjust).to_julian()
         b = Hijri(self.year, self.month , 1, self.adjust).to_julian()
@@ -92,5 +92,8 @@ class Jawa:
             self.pasaran.reverse()
             days = (self.acuan - datetime.date(self.year, self.month, self.day)).days
             i_pasaran = days % len(self.pasaran) - 1
-    
+
         return self.pasaran[i_pasaran]
+
+    def __str__(self):
+        return self.get_day_pasaran()
