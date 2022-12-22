@@ -73,3 +73,24 @@ class Hijri:
     def to_gregorian(self):
         date = self.to_julian()
         return Julian(date, self.adjust).to_gregorian()
+
+class Jawa:
+    acuan = datetime.date(2022,1,1)
+    pasaran = ["pahing", "pon", "wage", "kliwon", "legi"]
+    acuan_pasaran = 0
+    i_pasaran = acuan_pasaran
+    def __init__ (self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+    def get_day_pasaran(self):
+        if self.year >= 2022:
+            days = (datetime.date(self.year, self.month, self.day) - self.acuan).days
+            i_pasaran = days % len(self.pasaran)
+        else:
+            self.pasaran.reverse()
+            days = (self.acuan - datetime.date(self.year, self.month, self.day)).days
+            i_pasaran = days % len(self.pasaran) - 1
+    
+        return self.pasaran[i_pasaran]

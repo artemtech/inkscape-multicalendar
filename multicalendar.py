@@ -424,6 +424,18 @@ class Calendar(inkex.EffectExtension):
             cal2.append(weekcal)
         return cal2
 
+    def generate_pasaran(self, cal, y, m):
+        cal2 = []
+        for week in cal:
+            weekcal = []
+            for day in week:
+                if day == 0:
+                    weekcal.append(day)
+                else:
+                    weekcal.append(convert.Jawa(y, m, day))
+            cal2.append(weekcal)
+        return cal2
+
     def create_month(self, m):
         txt_atts = {
             'transform': 'translate(' +
@@ -442,12 +454,15 @@ class Calendar(inkex.EffectExtension):
         self.write_month_header(g, m)
         gdays = g.add(inkex.Group())
         gdays_secondary = g.add(inkex.Group())
+        gdays_pasaran = g.add(inkex.Group())
         if self.options.primary_calendar == "hijri":
             cal = hijri_monthcalendar(self.options.year, m, self.options.adjust_hijri_date)
             cal_secondary = self.generate_gregorian(cal, self.options.year, m, self.options.adjust_hijri_date)
+            cal_pasaran = self.generate_pasaran(cal, self.options.year, m)
         else:
             cal = calendar.monthcalendar(self.options.year, m)
             cal_secondary = self.generate_hijri(cal, self.options.year, m)
+            cal_pasaran = self.generate_pasaran(cal, self.options.year, m)
 
         if self.options.enable_secondary_date:
             gmonths_secondary = g.add(inkex.Group())
@@ -503,6 +518,7 @@ class Calendar(inkex.EffectExtension):
             # add a line after the last week
             cal.append([0, 0, 0, 0, 0, 0, 0])
             cal_secondary.append([0, 0, 0, 0, 0, 0, 0])
+            cal_pasaran.append([0, 0, 0, 0, 0, 0, 0])
         if len(cal) < 6:
             # add a line before the first week (Feb 2009)
             cal.reverse()
@@ -512,6 +528,9 @@ class Calendar(inkex.EffectExtension):
             cal_secondary.reverse()
             cal_secondary.append([0, 0, 0, 0, 0, 0, 0])
             cal_secondary.reverse()
+            cal_pasaran.reverse()
+            cal_pasaran.append([0, 0, 0, 0, 0, 0, 0])
+            cal_pasaran.reverse()
         # How mutch before month days will be showed:
         bmd = cal[0].count(0) + cal[1].count(0)
         bmd_secondary = cal_secondary[0].count(0) + cal_secondary[1].count(0)
@@ -552,8 +571,12 @@ class Calendar(inkex.EffectExtension):
                 txt_atts_hijri = {'style': str(inkex.Style(style_hijri)),
                             'x': str((self.day_w * week_x) + 2),
                             'y': str((self.day_h * (week_y + 2)) + 2)}
+                txt_atts_pasaran = {'style': str(inkex.Style(style_hijri)),
+                            'x': str((self.day_w * week_x) + 2),
+                            'y': str((self.day_h * (week_y + 2)) + 2)}
                 text = None
                 text_secondary = None
+                text_pasaran = None
                 if day == 0 and not self.options.fill_edb:
                     pass  # draw nothing
                 elif day == 0:
@@ -570,6 +593,7 @@ class Calendar(inkex.EffectExtension):
                 else:
                     text = str(day)
                     text_secondary = str(cal_secondary[w_idx][d_idx][2])
+                    text_pasaran = str(cal_pasaran[w_idx][d_idx][2])
                     before = False
                 if text:
                     if self.options.use_farsi_day != "second":
@@ -579,6 +603,7 @@ class Calendar(inkex.EffectExtension):
                     if self.options.use_farsi_day != "primer":
                         text_secondary = to_farsi(text_secondary)
                     gdays_secondary.add(TextElement(**txt_atts_hijri)).text = text_secondary
+                    gdays_pasaran.add(TextElement()).text = text_pasaran
                 week_x += 1
             week_y += 1
         self.month_x_pos += 1
