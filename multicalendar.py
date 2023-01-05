@@ -44,13 +44,13 @@ from inkex import TextElement
 from multicalendar_libs import convert
 from math import ceil
 
-import logging
+#import logging
 
-logging.basicConfig(filename="/home/altintop/a/inkscape.log",
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+#logging.basicConfig(filename="/home/altintop/a/inkscape.log",
+#                    filemode='a',
+#                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+#                    datefmt='%H:%M:%S',
+#                    level=logging.DEBUG)
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
@@ -314,7 +314,7 @@ class Calendar(inkex.EffectExtension):
         self.style_weeknr = self.style_day.copy()
         self.style_weeknr['fill'] = self.options.color_weeknr
         self.style_weeknr['font-size'] = str(self.day_w / 3)
-        logging.info(f"third calendar ==> {self.options.third_calendar}")
+        #logging.info(f"third calendar ==> {self.options.third_calendar}")
         if self.options.third_calendar:
             self.style_day_pasaran = self.style_day_hijri.copy()
             self.style_day_pasaran["font-size"] = str(self.day_w / 8)
